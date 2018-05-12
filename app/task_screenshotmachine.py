@@ -3,26 +3,31 @@ import uuid
 import asyncio
 
 import aiohttp
+from async_timeout import timeout
 
 from settings import DST_URL_TEMPLATE, SCREENSHOTMACHINE_QUERY_LIMIT, SCREENSHOTMACHINE_HOST, USER_AGENT, \
-    SCREENSHOTMACHINE_CONCURRENCY
+    SCREENSHOTMACHINE_CONCURRENCY, DEFAULT_TIMEOUT, get_proxy, spin
 
 
-async def task(num, sem: asyncio.Semaphore):
-    url = DST_URL_TEMPLATE % (uuid.uuid4().hex, 'screenshotmachine')
+async def task(num, sem: asyncio.Semaphore, proxy: str):
+    url = DST_URL_TEMPLATE % ('www', uuid.uuid4().hex, 'screenshotmachine')
     async with sem:
-        async with aiohttp.ClientSession(headers={'User-Agent': USER_AGENT}, raise_for_status=True) as session:
-            try:
-                async with session.post(SCREENSHOTMACHINE_HOST, data={'urlparam': url, 'device': 'desktop'}) as response:
-                    resp = await response.text()
-                    logging.info('%s: %s %s', num, url, resp[:100])
-            except Exception as e:
-                logging.info('exception %s', e)
+        try:
+            async with timeout(DEFAULT_TIMEOUT) as cm:
+                async with aiohttp.ClientSession(headers={'User-Agent': USER_AGENT}, raise_for_status=True,
+                                                 connector=aiohttp.TCPConnector(verify_ssl=False)) as session:
+                        async with session.post(SCREENSHOTMACHINE_HOST, data={'urlparam': url, 'device': 'desktop'},
+                                                proxy='http://%s' % proxy, timeout=DEFAULT_TIMEOUT) as response:
+                            resp = await response.text()
+                            logging.info('%s: %s %s', num, url, resp[:100])
+        except Exception as e:
+            logging.info('exception %s %s', e, type(e))
 
 
 async def main():
+    proxy = get_proxy()
     sem = asyncio.Semaphore(SCREENSHOTMACHINE_CONCURRENCY)
-    tasks = [asyncio.ensure_future(task(i, sem)) for i in range(SCREENSHOTMACHINE_QUERY_LIMIT)]
+    tasks = [asyncio.ensure_future(task(i, sem, proxy)) for i in range(SCREENSHOTMACHINE_QUERY_LIMIT)]
     await asyncio.wait(tasks)
 
 

@@ -25,10 +25,12 @@ async def task(num, sem: asyncio.Semaphore, proxy: str):
 
 
 async def main():
+    logging.info('start')
     proxy = get_proxy()
     sem = asyncio.Semaphore(SCREENSHOTMACHINE_CONCURRENCY)
     tasks = [asyncio.ensure_future(task(i, sem, proxy)) for i in range(SCREENSHOTMACHINE_QUERY_LIMIT)]
     await asyncio.wait(tasks)
+    logging.info('end')
 
 
 if __name__ == '__main__':

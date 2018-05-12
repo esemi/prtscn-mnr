@@ -6,6 +6,7 @@ import requests
 from settings import DST_URL_TEMPLATE, THUMBA_HOST, THUMBA_QUERY_LIMIT, USER_AGENT, DEFAULT_TIMEOUT, get_proxy
 
 if __name__ == '__main__':
+    logging.info('start')
     proxy = get_proxy()
 
     for i in range(THUMBA_QUERY_LIMIT):
@@ -22,3 +23,4 @@ if __name__ == '__main__':
             if resp.status_code not in (200, 500):
                 proxy = get_proxy()
 
+    logging.info('end')

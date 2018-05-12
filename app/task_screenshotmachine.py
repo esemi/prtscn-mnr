@@ -6,7 +6,7 @@ import aiohttp
 from async_timeout import timeout
 
 from settings import DST_URL_TEMPLATE, SCREENSHOTMACHINE_QUERY_LIMIT, SCREENSHOTMACHINE_HOST, USER_AGENT, \
-    SCREENSHOTMACHINE_CONCURRENCY, DEFAULT_TIMEOUT, get_proxy, spin
+    SCREENSHOTMACHINE_CONCURRENCY, DEFAULT_TIMEOUT, get_proxy, getp
 
 
 async def task(num, sem: asyncio.Semaphore, proxy: str):

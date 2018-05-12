@@ -40,6 +40,13 @@ def spin():
     return '%s:%s' % (data['ip'], data['port'])
 
 
+def getp():
+    resp = requests.get('https://api.getproxylist.com/proxy?allowsUserAgentHeader=1&allowsPost=1&allowsHttps=1&protocol=http')
+    resp.raise_for_status()
+    data = resp.json()
+    return '%s:%s' % (data['ip'], data['port'])
+
+
 def get_proxy() -> str:
     def _():
         try:
@@ -52,6 +59,10 @@ def get_proxy() -> str:
             pass
         try:
             return spin()
+        except:
+            pass
+        try:
+            return getp()
         except:
             pass
     p = _()

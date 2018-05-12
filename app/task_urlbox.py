@@ -3,13 +3,14 @@ import uuid
 
 import requests
 
-from settings import DST_URL_TEMPLATE, MINER_KEYS, THUMBA_HOST, THUMBA_QUERY_LIMIT, USER_AGENT
+from settings import DST_URL_TEMPLATE, MINER_KEYS, URLBOX_QUERY_LIMIT, URLBOX_HOST, USER_AGENT
 
 if __name__ == '__main__':
-    for i in range(THUMBA_QUERY_LIMIT):
+    for i in range(URLBOX_QUERY_LIMIT):
         url = DST_URL_TEMPLATE % (uuid.uuid4().hex, MINER_KEYS['thumba_dummy'])
         try:
-            resp = requests.post(THUMBA_HOST, params={'url': url}, headers={'User-Agent': USER_AGENT})
+            resp = requests.post(URLBOX_HOST, data={'urlparam': url, 'device': 'desktop'}, headers={
+                'User-Agent': USER_AGENT})
         except Exception as e:
             logging.info('exception %s', e)
         else:

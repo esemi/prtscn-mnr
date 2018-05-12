@@ -1,1 +1,2 @@
-*/5 * * * * ~/venv/bin/python ~/current/app/task_thumba.py >> ~/logs/cron_thumba.log 2>&1
+*/10 * * * * ~/venv/bin/python ~/current/app/task_thumba.py >> ~/logs/cron_thumba.log 2>&1
+*/30 * * * * ~/venv/bin/python ~/current/app/task_urlbox.py >> ~/logs/cron_urlbox.log 2>&1

@@ -9,7 +9,7 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML
 
 THUMBA_HOST = 'https://www.thumbalizr.com/demo'
 THUMBA_QUERY_LIMIT = 50
-URLBOX_HOST = 'https://www.screenshotmachine.com/processor.php'
-URLBOX_QUERY_LIMIT = 50
+SCREENSHOTMACHINE_HOST = 'https://www.screenshotmachine.com/processor.php'
+SCREENSHOTMACHINE_QUERY_LIMIT = 50
 
 logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', level=logging.INFO)

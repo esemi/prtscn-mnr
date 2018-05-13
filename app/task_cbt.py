@@ -12,12 +12,10 @@ import os
 import requests
 from pyppeteer import launch
 
-from settings import DEFAULT_TIMEOUT, DST_URL_TEMPLATE
-
+from settings import DEFAULT_TIMEOUT, DST_URL_TEMPLATE, USER_AGENT
 
 CBT_CRED_FILE = os.path.expanduser('~/cbt_cred.json')
 BROWSER = None
-DEBUG = False
 LIMIT_TASKS = 5
 PASS = 'qwerty12456789qwerty'
 LOGIN_MASK = '%s@gmail.com'
@@ -53,7 +51,7 @@ class XBT:
             out['screenshots'] = []
             for i in d['screenshots']:
                 active_versions = [j for j in i['versions'] if j['active']]
-                if not active_versions:
+                if not len(active_versions):
                     out['screenshots'].append(i)
             return out
         else:
@@ -103,7 +101,9 @@ async def upsert_and_run_tasks(user: str, pswd: str) -> bool:
         res = client.rerun_task(task['screenshot_test_id'], task['versions'][0]['version_id'])
         logging.info('rerun task result %s', res)
 
-    return len(client.get_screenshots(True)) < LIMIT_TASKS
+    l = len(client.get_screenshots(True)['screenshots'])
+    logging.info('result not active tasks %s', l)
+    return l < LIMIT_TASKS
 
 
 async def main():
@@ -122,7 +122,7 @@ async def main():
     if need_reg_new:
         user, pswd = await register_new_acc()
         # save creds to file
-        with open(CBT_CRED_FILE, 'x') as f:
+        with open(CBT_CRED_FILE, 'w') as f:
             f.write('%s:%s' % (user, pswd))
 
         await upsert_and_run_tasks(user, pswd)
@@ -138,17 +138,21 @@ async def register_new_acc():
     global BROWSER
 
     login = LOGIN_MASK % uuid.uuid4().hex
-    logging.info('start registration %s', login)
-    BROWSER = await launch(headless=not DEBUG, ignoreHTTPSErrors=False,
+    logging.info('start registration %s:%s', login, PASS)
+    BROWSER = await launch(headless=False, ignoreHTTPSErrors=False,
                            executablePath='/usr/bin/google-chrome-stable')
 
     page = await BROWSER.newPage()
+    await page.setUserAgent(USER_AGENT)
     await page.goto('https://crossbrowsertesting.com/freetrial', timeout=DEFAULT_TIMEOUT * 1000)
     email_elem = await page.waitForSelector('.email input', timeout=DEFAULT_TIMEOUT * 1000)
-    pass_elem = await page.waitForSelector('.password input', timeout=DEFAULT_TIMEOUT * 1000)
-    submit_elem = await page.waitForSelector('.submit-btn', timeout=DEFAULT_TIMEOUT * 1000)
     await email_elem.type(login, {'delay': 59})
+
+    pass_elem = await page.waitForSelector('.password input', timeout=DEFAULT_TIMEOUT * 1000)
     await pass_elem.type(PASS, {'delay': 59})
+
+    submit_elem = await page.waitForSelector('.submit-btn', timeout=DEFAULT_TIMEOUT * 1000)
+    await submit_elem.hover()
     await submit_elem.click()
 
     await page.waitForSelector('a.utility-nav-item-link', timeout=DEFAULT_TIMEOUT * 1000)

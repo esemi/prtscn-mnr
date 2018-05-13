@@ -1,2 +1,3 @@
 */30 * * * * ~/venv/bin/python ~/current/app/task_thumba.py >> ~/logs/cron_thumba.log 2>&1
+*/30 * * * * xvfb-run -a ~/venv/bin/python ~/current/app/task_cbt.py >> ~/logs/cron_cbt.log 2>&1
 # */30 * * * * ~/venv/bin/python ~/current/app/task_screenshotmachine.py >> ~/logs/cron_screenshotmachine.log 2>&1

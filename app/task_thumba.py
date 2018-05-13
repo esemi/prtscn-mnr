@@ -3,7 +3,11 @@ import uuid
 
 import requests
 
-from settings import DST_URL_TEMPLATE, THUMBA_HOST, THUMBA_QUERY_LIMIT, USER_AGENT, DEFAULT_TIMEOUT, get_proxy
+from settings import DST_URL_TEMPLATE, USER_AGENT, DEFAULT_TIMEOUT, get_proxy
+
+THUMBA_HOST = 'https://www.thumbalizr.com/demo'
+THUMBA_QUERY_LIMIT = 50
+
 
 if __name__ == '__main__':
     logging.info('start')

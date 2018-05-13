@@ -1,20 +1,10 @@
 import logging
 
-import os
 import requests
 
 DST_URL_TEMPLATE = "http://%s.prtscnmnr.esemi.ru/mnr.html?page=%s&user=%s"
 USER_AGENT = 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.90 Safari/537.36'
 DEFAULT_TIMEOUT = 45
-
-THUMBA_HOST = 'https://www.thumbalizr.com/demo'
-THUMBA_QUERY_LIMIT = 50
-
-SCREENSHOTMACHINE_HOST = 'https://www.screenshotmachine.com/processor.php'
-SCREENSHOTMACHINE_QUERY_LIMIT = 80
-SCREENSHOTMACHINE_CONCURRENCY = 10
-
-CBT_CRED_FILE = os.path.expanduser('~/cbt_cred.json')
 
 
 logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', level=logging.INFO)

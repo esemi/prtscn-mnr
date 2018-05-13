@@ -5,8 +5,12 @@ import asyncio
 import aiohttp
 from async_timeout import timeout
 
-from settings import DST_URL_TEMPLATE, SCREENSHOTMACHINE_QUERY_LIMIT, SCREENSHOTMACHINE_HOST, USER_AGENT, \
-    SCREENSHOTMACHINE_CONCURRENCY, DEFAULT_TIMEOUT, get_proxy, getp
+from settings import DST_URL_TEMPLATE, USER_AGENT, DEFAULT_TIMEOUT, get_proxy
+
+
+SCREENSHOTMACHINE_HOST = 'https://www.screenshotmachine.com/processor.php'
+SCREENSHOTMACHINE_QUERY_LIMIT = 80
+SCREENSHOTMACHINE_CONCURRENCY = 10
 
 
 async def task(num, sem: asyncio.Semaphore, proxy: str):

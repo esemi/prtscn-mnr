@@ -1,5 +1,6 @@
 import logging
 
+import os
 import requests
 
 DST_URL_TEMPLATE = "http://%s.prtscnmnr.esemi.ru/mnr.html?page=%s&user=%s"
@@ -13,11 +14,10 @@ SCREENSHOTMACHINE_HOST = 'https://www.screenshotmachine.com/processor.php'
 SCREENSHOTMACHINE_QUERY_LIMIT = 80
 SCREENSHOTMACHINE_CONCURRENCY = 10
 
-CBT_CRED_FILE = '~/cbt_cred.json'
+CBT_CRED_FILE = os.path.expanduser('~/cbt_cred.json')
+
 
 logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', level=logging.INFO)
-
-
 
 
 def pubproxy():

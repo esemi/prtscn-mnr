@@ -11,6 +11,7 @@ import copy
 import os
 import requests
 from pyppeteer import launch
+from faker import Faker
 
 from settings import DEFAULT_TIMEOUT, DST_URL_TEMPLATE, USER_AGENT
 
@@ -18,7 +19,8 @@ CBT_CRED_FILE = os.path.expanduser('~/cbt_cred.json')
 BROWSER = None
 LIMIT_TASKS = 5
 PASS = 'qwerty12456789qwerty'
-LOGIN_MASK = '%s@gmail.com'
+
+
 # todo proxy
 
 
@@ -80,6 +82,14 @@ class XBT:
             return False
 
 
+def get_random_email():
+    locale = random.choice(['fr_FR', 'it_IT', 'en_AU', 'en_CA', 'en_GB', 'en_US', 'es_ES'])
+    fake = Faker(locale)
+    name = fake.name().strip().lower().replace(' ', '_')
+    domain = random.choice(['gmail.com', 'hotmail.com', 'outlook.com.au'])
+    return '%s%s@%s' % (name, random.randint(74, 2018), domain)
+
+
 async def upsert_and_run_tasks(user: str, pswd: str) -> bool:
     logging.info('start upsert run tasks %s:%s', user, pswd)
     client = XBT(user, pswd)
@@ -137,7 +147,7 @@ async def main():
 async def register_new_acc():
     global BROWSER
 
-    login = LOGIN_MASK % uuid.uuid4().hex
+    login = get_random_email()
     logging.info('start registration %s:%s', login, PASS)
     BROWSER = await launch(headless=False, ignoreHTTPSErrors=False,
                            executablePath='/usr/bin/google-chrome-stable')

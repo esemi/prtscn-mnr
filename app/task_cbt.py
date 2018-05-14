@@ -13,7 +13,7 @@ import requests
 from pyppeteer import launch
 from faker import Faker
 
-from settings import DEFAULT_TIMEOUT, DST_URL_TEMPLATE, USER_AGENT
+from settings import DEFAULT_TIMEOUT, DST_URL_TEMPLATE, USER_AGENT, get_proxy
 
 CBT_CRED_FILE = os.path.expanduser('~/cbt_cred.json')
 BROWSER = None
@@ -21,19 +21,25 @@ LIMIT_TASKS = 5
 PASS = 'qwerty12456789qwerty'
 
 
-# todo proxy
-
-
 class XBT:
     endpoint_template = 'https://crossbrowsertesting.com/api/v3/%s'
 
-    def __init__(self, user, pswd):
+    def __init__(self, user, pswd, proxy):
         self.user = user
         self.pswd = pswd
+        self.proxy = proxy
+
+    def _get(self, url, params={}):
+        proxies = {'http': 'http://%s' % self.proxy,'https': 'http://%s' % self.proxy}
+        return requests.get(url, verify=False, auth=(self.user, self.pswd), proxies=proxies, params=params)
+
+    def _post(self, url, params={}):
+        proxies = {'http': 'http://%s' % self.proxy,'https': 'http://%s' % self.proxy}
+        return requests.post(url, verify=False, auth=(self.user, self.pswd), proxies=proxies, params=params)
 
     def browsers_list(self) -> list:
         url = self.endpoint_template % 'screenshots/browsers'
-        response = requests.get(url, auth=(self.user, self.pswd))
+        response = self._get(url)
         response.raise_for_status()
         d = response.json()
         browsers = list(set([j['api_name'] for i in d
@@ -44,7 +50,7 @@ class XBT:
     def get_screenshots(self, inactive_only=False) -> dict:
         url = self.endpoint_template % 'screenshots/'
         params = {'archived': 'false'}
-        response = requests.get(url, auth=(self.user, self.pswd), params=params)
+        response = self._get(url, params)
         response.raise_for_status()
         d = response.json()
 
@@ -61,9 +67,7 @@ class XBT:
 
     def create_task(self, dst, browsers: list) -> Optional[int]:
         url = self.endpoint_template % 'screenshots/'
-        response = requests.post(url, auth=(self.user, self.pswd), params={
-            'url': dst, 'delay': 60, 'browsers': browsers[:25]
-        })
+        response = self._post(url, {'url': dst, 'delay': 60, 'browsers': browsers[:25]})
         try:
             return response.json()['screenshot_test_id']
         except:
@@ -72,8 +76,7 @@ class XBT:
 
     def rerun_task(self, id, version) -> bool:
         url = self.endpoint_template % ('screenshots/%s/%s' % (id, version))
-        response = requests.post(url, auth=(self.user, self.pswd), params={'screenshot_test_id': id,
-                                                                           'version_id': version})
+        response = self._post(url, {'screenshot_test_id': id, 'version_id': version})
         try:
             id = response.json()['screenshot_test_id']
             return True
@@ -90,9 +93,9 @@ def get_random_email():
     return '%s%s@%s' % (name, random.randint(74, 2018), domain)
 
 
-async def upsert_and_run_tasks(user: str, pswd: str) -> bool:
+async def upsert_and_run_tasks(user: str, pswd: str, proxy: str) -> bool:
     logging.info('start upsert run tasks %s:%s', user, pswd)
-    client = XBT(user, pswd)
+    client = XBT(user, pswd, proxy)
     tasks = client.get_screenshots()
     logging.info('found %d tasks', tasks['meta']['record_count'])
     if tasks['meta']['record_count'] < LIMIT_TASKS:
@@ -117,6 +120,7 @@ async def upsert_and_run_tasks(user: str, pswd: str) -> bool:
 
 
 async def main():
+    proxy = get_proxy()
     need_reg_new = False
     user = pswd = None
     try:
@@ -125,17 +129,17 @@ async def main():
     except Exception:
         need_reg_new = True
     else:
-        res = await upsert_and_run_tasks(user, pswd)
+        res = await upsert_and_run_tasks(user, pswd, proxy)
         if not res:
             need_reg_new = True
 
     if need_reg_new:
-        user, pswd = await register_new_acc()
+        user, pswd = await register_new_acc(proxy)
         # save creds to file
         with open(CBT_CRED_FILE, 'w') as f:
             f.write('%s:%s' % (user, pswd))
 
-        await upsert_and_run_tasks(user, pswd)
+        await upsert_and_run_tasks(user, pswd, proxy)
 
     try:
         await asyncio.sleep(10)
@@ -144,13 +148,13 @@ async def main():
         pass
 
 
-async def register_new_acc():
+async def register_new_acc(proxy: str):
     global BROWSER
 
     login = get_random_email()
     logging.info('start registration %s:%s', login, PASS)
     BROWSER = await launch(headless=False, ignoreHTTPSErrors=False,
-                           executablePath='/usr/bin/google-chrome-stable')
+                           executablePath='/usr/bin/google-chrome-stable', args=['--proxy-server=%s' % proxy])
 
     page = await BROWSER.newPage()
     await page.setUserAgent(USER_AGENT)

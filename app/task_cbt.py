@@ -138,7 +138,7 @@ async def main():
             os.remove(CBT_CRED_FILE)
         except:
             pass
-        
+
         user, pswd = await register_new_acc(proxy)
         # save creds to file
         with open(CBT_CRED_FILE, 'w') as f:
